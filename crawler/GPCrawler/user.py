@@ -6,7 +6,7 @@ from util.base_object import BaseObject
 class User(BaseObject):
 
     keyMapping = (
-            'name', 'sex', 'place',
+            'name', 'sex', 'place', 'cnum'
             'follows', 'fans', 'contents'
             )
 
@@ -14,6 +14,7 @@ class User(BaseObject):
         self.name = ''
         self.sex = ''
         self.place = ''
+        self.cnum = ''
         self.follows = ''
         self.fans = ''
         self.contents = []

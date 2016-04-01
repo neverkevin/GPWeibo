@@ -7,6 +7,7 @@ import time
 from bs4 import BeautifulSoup
 from lxml import etree
 from GPCrawler.base_crawler import BaseCrawler
+from GPCrawler.user import User
 
 import sys
 reload(sys)
@@ -14,6 +15,11 @@ sys.setdefaultencoding('utf-8')
 
 
 NUM_PATTERN = re.compile('\[(\d+)\]')
+USER = re.compile('/u/\d+$')
+FANS = re.compile('/fans$')
+FANS_PAGE = re.compile('/fans?page=\d+$')
+FOLLOW = re.compile('/follow$')
+FOLLOW_PAGE = re.compile('/follow?page=\d+$')
 
 
 class WeiboCrawler(BaseCrawler):
@@ -43,52 +49,38 @@ class WeiboCrawler(BaseCrawler):
                 if self.if_follow(new_url) and new_url not in crawled_queue:
                     crawl_queue.put(new_url)
 
-            time.sleep(2)
 
     def if_parse(self, url):
-        user_home = re.compile('/u/\d+$')
-        if user_home.search(url):
+        if USER.search(url):
             return True
         return False
 
     def if_follow(self, url):
-        user = re.compile('/u/\d+$')
-        fans = re.compile('/fans$')
-        fans_page = re.compile('/fans?page=\d+$')
-        follow = re.compile('/follow$')
-        follow_page = re.compile('/follow?page=\d+$')
-        if fans.search(url) or follow.search(url) or user.search(url) or \
-                fans_page.search(url) or follow_page.search(url):
+        if FANS.search(url) or FOLLOW.search(url) or USER.search(url) or \
+                FANS_PAGE.search(url) or FOLLOW_PAGE.search(url):
             return True
         return False
 
     def parse(self, response):
-        print 'response.url: %s' % response.url
+        user = User()
         selector = etree.HTML(response.content)
-        name = selector.xpath('//title/text()')[0][:-3]
-        print 'name: %s' % name
+        user.name = selector.xpath('//title/text()')[0][:-3]
         data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
         if len(data) != 1:
             message = data[1]
         else:
             message = data[0].split(u'\xa0')[1]
-        sex = message.split('/')[0]
-        print 'sex: %s' % sex
-        place = message.split('/')[1]
-        print 'place: %s' % place
+        user.sex = message.split('/')[0]
+        user.place = message.split('/')[1].split(' ')[0]
         num = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
-        num = self.get_num(num)
-        print 'num: %s' % num
+        user.cnum = self.get_num(num)
         follows = selector.xpath('//div[@class="tip2"]/a/text()')[0]
-        follows = self.get_num(follows)
-        print 'follows: %s' % follows
+        user.follows = self.get_num(follows)
         fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
-        fans = self.get_num(fans)
-        print 'fans: %s' % fans
-        contents = self.get_contents(response.url)
-        print '### content: ---:'
-        for content in contents:
-            print content
+        user.fans = self.get_num(fans)
+        user.contents = self.get_contents(response.url)
+        print 'Info: crawled weibo user: {}, sex: {}, place: {}, cnum: {}, follows: {}, fans: {}'.format(
+                user.name, user.sex, user.place, user.cnum, user.follows, user.fans)
 
     def get_contents(self, url):
         """下载用户原创微博页面"""
@@ -106,8 +98,7 @@ class WeiboCrawler(BaseCrawler):
         divs = page.find_all('div')
         content = []
         for div in divs:
-            if u'class' and u'id' in div.attrs.keys() and \
-                    u'c' in div.attrs[u'class']:
+            if u'class' and u'id' in div.attrs.keys() and u'c' in div.attrs[u'class']:
                 text = div.span.text
                 content.append(text)
         return content

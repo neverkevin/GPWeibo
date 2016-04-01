@@ -3,9 +3,9 @@
 # import sys
 # import settings
 import requests
-import re
+# import re
 import time
-import Queue
+# import Queue
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
@@ -49,6 +49,7 @@ class BaseCrawler(object):
     #     return self.get_links_from_url(self.start_url)
 
     def get_response_from_url(self, url):
+        time.sleep(1)
         print 'fetching url: %s' % url
         response = requests.get(url, headers=self.headers)
         print 'status_code: {}'.format(response.status_code)
