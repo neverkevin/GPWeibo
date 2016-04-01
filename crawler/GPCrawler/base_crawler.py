@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# import sys
-# import settings
 import requests
-# import re
 import time
-# import Queue
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
-
-# sys.path.append('../')
+import settings
 
 
 class BaseCrawler(object):
@@ -18,17 +13,12 @@ class BaseCrawler(object):
     domain = ''
     start_url = ''
 
-    host = ''
-    user_agent = ''
-    cookie = ''
-    referer = ''
-
     def __init__(self):
         self.headers = {
-            'Cookie': self.cookie,
-            'Host': self.host,
-            'Referer': self.referer,
-            'User-Agent': self.user_agent
+            'Cookie': settings.cookie,
+            'Host': settings.host,
+            'Referer': settings.referer,
+            'User-Agent': settings.user_agent
             }
         self.start()
 
