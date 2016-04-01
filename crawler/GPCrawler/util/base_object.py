@@ -3,6 +3,7 @@
 
 import json
 
+
 class BaseObject(object):
 
     keyMapping = ()
@@ -16,7 +17,7 @@ class BaseObject(object):
             else:
                 for k in self.keyMapping:
                     if k in data:
-                         setattr(self, k, data[k])
+                        setattr(self, k, data[k])
 
     def __repr__(self):
         return self.__str__()
