@@ -6,7 +6,7 @@ import Queue
 import time
 from bs4 import BeautifulSoup
 from lxml import etree
-from base_crawler import BaseCrawler
+from GPCrawler.base_crawler import BaseCrawler
 
 import sys
 reload(sys)
