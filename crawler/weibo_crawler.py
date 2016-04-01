@@ -3,10 +3,10 @@
 
 import re
 import Queue
-from bs4 import BeautifulSoup
 from lxml import etree
-from GPCrawler.base_crawler import BaseCrawler
+from bs4 import BeautifulSoup
 from GPCrawler.user import User
+from GPCrawler.base_crawler import BaseCrawler
 
 import sys
 reload(sys)

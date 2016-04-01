@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import requests
 import time
+import requests
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
