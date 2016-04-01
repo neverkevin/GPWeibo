@@ -5,11 +5,15 @@ import re
 import Queue
 import time
 from bs4 import BeautifulSoup
+from lxml import etree
 from base_crawler import BaseCrawler
 
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+
+NUM_PATTERN = re.compile('\[(\d+)\]')
 
 
 class WeiboCrawler(BaseCrawler):
@@ -19,28 +23,27 @@ class WeiboCrawler(BaseCrawler):
 
     host = "weibo.cn"
     user_agent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36"
-    cookie = "T_WM=bd230a5604cdb56bbe4314af5958fee3; SUB=_2A257_nv8DeRxGeNO7VUU8yzFzziIHXVZAQW0rDV6PUJbstBeLUfBkW1LHestAc5CP2aVdWeNBDhuCgt5SNU4Tg..; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WFGTX4oOj01Hw_XFxKFbxQr5JpX5o2p; SUHB=0sqxHehL6B7UvD; SSOLoginState=1459227564; gsid_CTandWM=4uYDCpOz53uLLl4dRLMZ4lgiofe"
-    # referer = 'http://weibo.cn'
-    referer = "http://login.sina.com.cn/sso/login.php?url=http%3A%2F%2Fweibo.cn%2F&_rand=1459153356.0121&gateway=1&service=sinawap&entry=sinawap&useticket=1&returntype=META&sudaref=&_client_version=0.6.16",
+    cookie = "_T_WM=bd230a5604cdb56bbe4314af5958fee3; SUB=_2A257-YWHDeRxGeNO7VUU8yzFzziIHXVZBSvPrDV6PUNbvtBeLVD2kW1LHesCidiZw6DLYXAl3ixoiuuf3V16Hw..; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WFGTX4oOj01Hw_XFxKFbxQr5JpX5KMt; SUHB=0D-1-6btaOC7ng; SSOLoginState=1459484119; gsid_CTandWM=4uz7CpOz5ic9UsTQFfVL1lgiofe"
+    referer = 'http://weibo.cn'
+    # referer = "http://login.sina.com.cn/sso/login.php?url=http%3A%2F%2Fweibo.cn%2F&_rand=1459153356.0121&gateway=1&service=sinawap&entry=sinawap&useticket=1&returntype=META&sudaref=&_client_version=0.6.16",
 
     def start(self):
         crawl_queue = Queue.Queue()
-        crawled_queue = list()
+        crawled_queue = set()
         crawl_queue.put(self.start_url)
         while True:
             url = crawl_queue.get()
             response = self.get_response_from_url(url)
-            if self.if_parse(url):
+            if self.if_parse(url) and url not in crawled_queue:
                 self.parse(response)
-                crawled_queue.append(url)
+                crawled_queue.add(url)
 
             urls = self.get_links_from_html(response.text)
             for new_url in urls:
-                if self.if_parse(new_url) or self.if_follow(new_url) and \
-                        new_url not in crawled_queue:
+                if self.if_follow(new_url) and new_url not in crawled_queue:
                     crawl_queue.put(new_url)
 
-            time.sleep(1)
+            time.sleep(2)
 
     def if_parse(self, url):
         user_home = re.compile('/u/\d+$')
@@ -49,24 +52,39 @@ class WeiboCrawler(BaseCrawler):
         return False
 
     def if_follow(self, url):
+        user = re.compile('/u/\d+$')
         fans = re.compile('/fans$')
+        fans_page = re.compile('/fans?page=\d+$')
         follow = re.compile('/follow$')
-        if fans.search(url) or follow.search(url):
+        follow_page = re.compile('/follow?page=\d+$')
+        if fans.search(url) or follow.search(url) or user.search(url) or \
+                fans_page.search(url) or follow_page.search(url):
             return True
         return False
 
     def parse(self, response):
         print 'response.url: %s' % response.url
-        page = BeautifulSoup(response.text, 'lxml')
-        user = page.body.span.text
-        user_list = user.split(u'\xa0')
-        name = user_list[0].strip()
-        print 'name: {}'.format(name)
-        sex_place = user_list[1].split('/')
-        sex = sex_place[0].strip()
-        print 'sex: {}'.format(sex)
-        place = sex_place[1].strip()
-        print 'place: {}'.format(place)
+        selector = etree.HTML(response.content)
+        name = selector.xpath('//title/text()')[0][:-3]
+        print 'name: %s' % name
+        data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
+        if len(data) != 1:
+            message = data[1]
+        else:
+            message = data[0].split(u'\xa0')[1]
+        sex = message.split('/')[0]
+        print 'sex: %s' % sex
+        place = message.split('/')[1]
+        print 'place: %s' % place
+        num = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
+        num = self.get_num(num)
+        print 'num: %s' % num
+        follows = selector.xpath('//div[@class="tip2"]/a/text()')[0]
+        follows = self.get_num(follows)
+        print 'follows: %s' % follows
+        fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
+        fans = self.get_num(fans)
+        print 'fans: %s' % fans
         contents = self.get_contents(response.url)
         print '### content: ---:'
         for content in contents:
@@ -94,6 +112,12 @@ class WeiboCrawler(BaseCrawler):
                 content.append(text)
         return content
 
+    def get_num(self, data):
+        """Get num in `abc[123]`."""
+        data = NUM_PATTERN.findall(data)
+        if data[0]:
+            return data[0]
+        return ''
 
 if __name__ == '__main__':
     crawler = WeiboCrawler()
