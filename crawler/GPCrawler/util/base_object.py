@@ -6,6 +6,7 @@ import json
 
 class BaseObject(object):
 
+    table = ''
     keyMapping = ()
 
     def __init__(self, data=None):

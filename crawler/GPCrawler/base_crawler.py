@@ -6,6 +6,7 @@ from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
 import settings
+from dal import MySQLDal
 
 
 class BaseCrawler(object):
@@ -20,6 +21,7 @@ class BaseCrawler(object):
             'Referer': settings.referer,
             'User-Agent': settings.user_agent
             }
+        self.mysql = MySQLDal()
         self.start()
 
     def start(self):

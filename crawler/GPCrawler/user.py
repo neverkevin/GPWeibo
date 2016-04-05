@@ -5,6 +5,7 @@ from util.base_object import BaseObject
 
 class User(BaseObject):
 
+    table = 'user'
     keyMapping = (
             'name', 'sex', 'place', 'cnum'
             'follows', 'fans', 'contents'

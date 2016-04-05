@@ -3,6 +3,7 @@
 
 import re
 import Queue
+import time
 from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.user import User
@@ -70,9 +71,13 @@ class WeiboCrawler(BaseCrawler):
         user.follows = self.get_num(follows)
         fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
         user.fans = self.get_num(fans)
-        user.contents = self.get_contents(response.url)
+        # user.contents = self.get_contents(response.url)
         print 'Info: crawled weibo user: {}, sex: {}, place: {}, cnum: {}, follows: {}, fans: {}'.format(
                 user.name, user.sex, user.place, user.cnum, user.follows, user.fans)
+        print user.__dict__
+        result = self.mysql.insert(user.table, user.__dict__)
+        print 'insert result: %s' % result
+        time.sleep(10)
 
     def get_contents(self, url):
         """下载用户原创微博页面"""
