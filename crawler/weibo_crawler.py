@@ -3,10 +3,10 @@
 
 import re
 import Queue
-import time
 from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.user import User
+from GPCrawler import settings
 from GPCrawler.base_crawler import BaseCrawler
 
 import sys
@@ -55,8 +55,8 @@ class WeiboCrawler(BaseCrawler):
         return False
 
     def parse(self, response):
-        user = User()
         selector = etree.HTML(response.content)
+        user = User()
         user.name = selector.xpath('//title/text()')[0][:-3]
         data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
         if len(data) != 1:
@@ -71,18 +71,18 @@ class WeiboCrawler(BaseCrawler):
         user.follows = self.get_num(follows)
         fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
         user.fans = self.get_num(fans)
-        # user.contents = self.get_contents(response.url)
+        total_page = selector.xpath('//input[@name="mp"]/@value')[0]
+        contents = self.get_contents(response.url, int(total_page))
         print 'Info: crawled weibo user: {}, sex: {}, place: {}, cnum: {}, follows: {}, fans: {}'.format(
                 user.name, user.sex, user.place, user.cnum, user.follows, user.fans)
-        print user.__dict__
-        result = self.mysql.insert(user.table, user.__dict__)
-        print 'insert result: %s' % result
-        time.sleep(10)
+        uid = self.mysql.insert(user.table, user.__dict__)
+        self.mongo.insert(uid, contents)
 
-    def get_contents(self, url):
+    def get_contents(self, url, total_page):
         """下载用户原创微博页面"""
+        page = min(settings.CRAWL_PAGE, total_page) + 1
         contents = []
-        for i in range(1, 6):
+        for i in range(1, page):
             content_url = url + '?filter=1&page=%s' % i
             response = self.get_response_from_url(content_url)
             content = self.parse_page(response)

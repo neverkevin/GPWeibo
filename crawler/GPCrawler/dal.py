@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import MySQLdb
+from pymongo import MongoClient
 import settings
 
 
@@ -27,5 +28,21 @@ class MySQLDal(object):
         cursor = self.mysql_db.cursor()
         info.pop('contents')
         sql = get_insert_sql(table, info.keys())
-        result = cursor.execute(sql, info.values())
-        return result
+        cursor.execute(sql, info.values())
+        uid = cursor.lastrowid
+        return int(uid)
+
+
+class MongoDal(object):
+
+    def __init__(self):
+        self.mongo_db = MongoClient(
+            settings.MONGO_HOST,
+            settings.MONGO_PORT
+            )
+
+    def insert(self, uid, contents):
+        info = {"uid": uid, "contents": contents}
+        db = self.mongo_db.weibo
+        collections = db.weibo
+        collections.insert(info)

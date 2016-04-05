@@ -2,11 +2,13 @@
 
 import time
 import requests
+import redis
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
 import settings
 from dal import MySQLDal
+from dal import MongoDal
 
 
 class BaseCrawler(object):
@@ -16,12 +18,19 @@ class BaseCrawler(object):
 
     def __init__(self):
         self.headers = {
-            'Cookie': settings.cookie,
-            'Host': settings.host,
-            'Referer': settings.referer,
-            'User-Agent': settings.user_agent
+            'Cookie': settings.COOKIE,
+            'Host': settings.HOST,
+            'Referer': settings.REFERER,
+            'User-Agent': settings.USER_AGENT
             }
         self.mysql = MySQLDal()
+        self.mongo = MongoDal()
+        self.redis = redis.Redis(
+            host=settings.REDIS_ADDRESS,
+            port=settings.REDIS_PORT,
+            password=settings.REDIS_PASSWD,
+            db=settings.REDIS_INDEX
+            )
         self.start()
 
     def start(self):
@@ -41,7 +50,7 @@ class BaseCrawler(object):
     #     return self.get_links_from_url(self.start_url)
 
     def get_response_from_url(self, url):
-        time.sleep(1)
+        time.sleep(settings.DOWNLOAD_DELAY)
         print 'fetching url: %s' % url
         response = requests.get(url, headers=self.headers)
         print 'status_code: {}'.format(response.status_code)
