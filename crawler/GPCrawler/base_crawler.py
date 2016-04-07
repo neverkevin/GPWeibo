@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import os
 import time
+import random
 import requests
 import redis
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
 import settings
-from dal import MySQLDal
+# from dal import MySQLDal
 from dal import MongoDal
 
 
 class BaseCrawler(object):
 
     domain = ''
-    start_url = ''
+    start_url = ()
+    deny_url = ''
 
     def __init__(self):
         self.headers = {
@@ -23,7 +26,7 @@ class BaseCrawler(object):
             'Referer': settings.REFERER,
             'User-Agent': settings.USER_AGENT
             }
-        self.mysql = MySQLDal()
+        # self.mysql = MySQLDal()
         self.mongo = MongoDal()
         self.redis = redis.Redis(
             host=settings.REDIS_ADDRESS,
@@ -44,19 +47,19 @@ class BaseCrawler(object):
         """
         pass
 
-    # @property
-    # def crawl_urls(self):
-    #     """"An alias for `get_links_from_url`"""
-    #     return self.get_links_from_url(self.start_url)
-
     def get_response_from_url(self, url):
-        time.sleep(settings.DOWNLOAD_DELAY)
+        time.sleep(random.choice(settings.DOWNLOAD_DELAY))
         print 'fetching url: %s' % url
         response = requests.get(url, headers=self.headers)
         print 'status_code: {}'.format(response.status_code)
         if response.status_code != 200:
-            # logging.error
-            pass
+            print 'status_code：%s. Cookie no longer has any effect.' \
+                % response.status_code
+            os._exit()
+        if response.url == self.deny_url:
+            print 'crawled errer weibo.cn/pub/, retry...'
+            time.sleep(60)
+            self.get_response_from_url(url)
         return response
 
     def get_links_from_html(self, html):

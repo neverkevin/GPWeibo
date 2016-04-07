@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-import Queue
 from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.user import User
@@ -25,23 +24,23 @@ FOLLOW_PAGE = re.compile('/follow?page=\d+$')
 class WeiboCrawler(BaseCrawler):
 
     domain = 'http://weibo.cn'
-    start_url = 'http://weibo.cn'
+    start_urls = ('http://weibo.cn',)
+    deny_url = 'http://weibo.cn/pub/'
 
     def start(self):
-        crawl_queue = Queue.Queue()
-        crawled_queue = set()
-        crawl_queue.put(self.start_url)
+        for url in self.start_urls:
+            self.redis.lpush("weibo_crawl_queue", url)
         while True:
-            url = crawl_queue.get()
+            url = self.redis.lpop("weibo_crawl_queue")
             response = self.get_response_from_url(url)
-            if self.if_parse(url) and url not in crawled_queue:
+            if self.if_parse(url) and not self.redis.sismember('weibo_crawled_queue', url):
                 self.parse(response)
-                crawled_queue.add(url)
+                self.redis.sadd('weibo_crawled_queue', url)
 
             urls = self.get_links_from_html(response.text)
             for new_url in urls:
-                if self.if_follow(new_url) and new_url not in crawled_queue:
-                    crawl_queue.put(new_url)
+                if self.if_follow(new_url) and not self.redis.sismember('weibo_crawled_queue', new_url):
+                    self.redis.lpush("weibo_crawl_queue", new_url)
 
     def if_parse(self, url):
         if USER.search(url):
@@ -56,6 +55,7 @@ class WeiboCrawler(BaseCrawler):
 
     def parse(self, response):
         selector = etree.HTML(response.content)
+        print 'response.url: %s' % response.url
         user = User()
         user.name = selector.xpath('//title/text()')[0][:-3]
         data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
@@ -64,19 +64,19 @@ class WeiboCrawler(BaseCrawler):
         else:
             message = data[0].split(u'\xa0')[1]
         user.sex = message.split('/')[0]
-        user.place = message.split('/')[1].split(' ')[0]
+        user.area = message.split('/')[1].split(' ')[0]
         num = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
         user.cnum = self.get_num(num)
         follows = selector.xpath('//div[@class="tip2"]/a/text()')[0]
         user.follows = self.get_num(follows)
         fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
         user.fans = self.get_num(fans)
-        total_page = selector.xpath('//input[@name="mp"]/@value')[0]
-        contents = self.get_contents(response.url, int(total_page))
-        print 'Info: crawled weibo user: {}, sex: {}, place: {}, cnum: {}, follows: {}, fans: {}'.format(
-                user.name, user.sex, user.place, user.cnum, user.follows, user.fans)
-        uid = self.mysql.insert(user.table, user.__dict__)
-        self.mongo.insert(uid, contents)
+        total_page = selector.xpath('//input[@name="mp"]/@value')
+        total_page = total_page[0] if total_page else 1
+        user.contents = self.get_contents(response.url, int(total_page))
+        print 'Info: crawled weibo user: {}, sex: {}, area: {}, cnum: {}, follows: {}, fans: {}'.format(
+                user.name, user.sex, user.area, user.cnum, user.follows, user.fans)
+        self.mongo.insert(user.__dict__)
 
     def get_contents(self, url, total_page):
         """下载用户原创微博页面"""

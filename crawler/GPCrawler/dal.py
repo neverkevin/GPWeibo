@@ -41,8 +41,7 @@ class MongoDal(object):
             settings.MONGO_PORT
             )
 
-    def insert(self, uid, contents):
-        info = {"uid": uid, "contents": contents}
+    def insert(self, info):
         db = self.mongo_db.weibo
         collections = db.weibo
         collections.insert(info)
