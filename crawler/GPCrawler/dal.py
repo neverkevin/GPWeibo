@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import MySQLdb
+# import MySQLdb
 from pymongo import MongoClient
 import settings
 
 
+"""
 def get_insert_sql(table, keys):
     sql = 'INSERT INTO %s (%s) VALUES (%s)' % (
         table, ', '.join(keys), ', '.join(['%s'] * len(keys))
@@ -31,6 +32,7 @@ class MySQLDal(object):
         cursor.execute(sql, info.values())
         uid = cursor.lastrowid
         return int(uid)
+"""
 
 
 class MongoDal(object):
