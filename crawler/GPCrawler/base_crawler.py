@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import os
+import sys
 import time
 import random
-import requests
 import redis
 from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
 import settings
-# from dal import MySQLDal
+from login import login
 from dal import MongoDal
+# from dal import MySQLDal
 
 
 class BaseCrawler(object):
@@ -47,15 +47,22 @@ class BaseCrawler(object):
         """
         pass
 
+    def get_session(self):
+        username = settings.USERS.get('username')
+        password = settings.USERS.get('password')
+        session = login(username, password)
+        return session
+
     def get_response_from_url(self, url):
         time.sleep(random.choice(settings.DOWNLOAD_DELAY))
         print 'fetching url: %s' % url
-        response = requests.get(url, headers=self.headers)
+        session = self.get_session()
+        response = session.get(url)
         print 'status_code: {}'.format(response.status_code)
         if response.status_code != 200:
             print 'status_code：%s. Cookie no longer has any effect.' \
                 % response.status_code
-            os._exit()
+            sys._exit(0)
         if response.url == self.deny_url:
             print 'crawled errer weibo.cn/pub/, retry...'
             time.sleep(60)

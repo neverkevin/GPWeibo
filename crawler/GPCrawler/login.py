@@ -8,6 +8,7 @@ import settings
 
 PWSSWD_WRONG = u'\u767b\u5f55\u540d\u6216\u5bc6\u7801\u9519\u8bef'
 
+
 def login(username, password):
     """Return session with headers."""
     login_url = "https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)"
@@ -44,9 +45,3 @@ def login(username, password):
     session.headers["Referer"] = settings.REFERER
     session.headers["User-Agent"] = settings.USER_AGENT
     return session
-
-
-if __name__ == "__main__":
-    username = 'daola0761692@163.com'
-    password = 'aaa333'
-    login(username, password)

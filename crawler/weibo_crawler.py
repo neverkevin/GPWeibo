@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-import re from lxml import etree
+import re
+from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.user import User
 from GPCrawler import settings
