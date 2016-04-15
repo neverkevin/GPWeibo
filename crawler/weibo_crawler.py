@@ -48,8 +48,7 @@ class WeiboCrawler(BaseCrawler):
         return False
 
     def if_follow(self, url):
-        if FANS.search(url) or FOLLOW.search(url) or USER.search(url) or \
-                FANS_PAGE.search(url) or FOLLOW_PAGE.search(url):
+        if FANS.search(url) or USER.search(url) or FANS_PAGE.search(url):
             return True
         return False
 

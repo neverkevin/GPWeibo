@@ -7,6 +7,11 @@ import settings
 
 
 """
+def get_select_sql(tabel, keys):
+    sql = 'select %s from %s' % (
+        ','.join(keys), table
+        )
+
 def get_insert_sql(table, keys):
     sql = 'INSERT INTO %s (%s) VALUES (%s)' % (
         table, ', '.join(keys), ', '.join(['%s'] * len(keys))
@@ -27,11 +32,15 @@ class MySQLDal(object):
 
     def insert(self, table, info):
         cursor = self.mysql_db.cursor()
-        info.pop('contents')
         sql = get_insert_sql(table, info.keys())
         cursor.execute(sql, info.values())
         uid = cursor.lastrowid
         return int(uid)
+
+    def get(self, table, info):
+        cursor = self.mysql_db.cursor()
+        sql = get_select_sql(table, info.keys)
+        cursor.execute(sql, info.values())
 """
 
 
