@@ -61,11 +61,11 @@ class MySQLDal(object):
 
     def __init__(self):
         self.mysql_db = MySQLdb.connect(
-            host=settings.MYSQL_HOST,
-            db=settings.MYSQL_DATABASE_NAME,
-            user=settings.MYSQL_USER_NAME,
-            passwd=settings.MYSQL_PASS_WORD,
-            charset="utf8"
+                host=settings.MYSQL_HOST,
+                db=settings.MYSQL_DATABASE_NAME,
+                user=settings.MYSQL_USER_NAME,
+                passwd=settings.MYSQL_PASS_WORD,
+                charset="utf8"
             )
 
     def insert(self, table, info):
@@ -79,7 +79,7 @@ class MySQLDal(object):
         cursor = self.mysql_db.cursor()
         sql = get_select_sql(
                 table, info.keys, where=where, order_by=order_by, limit=limit
-                )
+            )
         # where options '__isnull' dont exists `%s`
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
@@ -91,7 +91,7 @@ class MySQLDal(object):
         cursor = self.mysql_db.cursor()
         sql = get_select_sql(
                 table, info, where=where, order_by=order_by, limit=limit
-                )
+            )
         # where options '__isnull' dont exists `%s`
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
@@ -104,8 +104,8 @@ class MongoDal(object):
 
     def __init__(self):
         self.mongo_db = MongoClient(
-            settings.MONGO_HOST,
-            settings.MONGO_PORT
+                settings.MONGO_HOST,
+                settings.MONGO_PORT
             )
 
     def insert(self, info):

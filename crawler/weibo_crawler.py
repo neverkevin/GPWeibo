@@ -4,7 +4,7 @@
 import re
 from lxml import etree
 from bs4 import BeautifulSoup
-from GPCrawler.user import User
+from GPCrawler.types.user import User
 from GPCrawler import settings
 from GPCrawler.base_crawler import BaseCrawler
 

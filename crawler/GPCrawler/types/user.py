@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from util.base_object import BaseObject
+from base_object import BaseObject
 
 
 class User(BaseObject):
 
     table = 'user'
     keyMapping = (
-            'name', 'sex', 'area', 'cnum'
+            'name', 'sex', 'area', 'cnum',
             'follows', 'fans', 'contents'
             )
 

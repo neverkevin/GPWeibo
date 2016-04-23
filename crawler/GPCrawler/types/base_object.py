@@ -11,7 +11,12 @@ class BaseObject(object):
 
     def __init__(self, data=None):
         if data is not None:
-            if isinstance(data.values()[0], list):
+            if isinstance(data, tuple):
+                i = 1
+                for k in self.keyMapping:
+                    setattr(self, k, data[i])
+                    i += 1
+            elif isinstance(data.values()[0], list):
                 for k in self.keyMapping:
                     if k in data:
                         setattr(self, k, data[k][0])
