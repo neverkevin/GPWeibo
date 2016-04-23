@@ -25,7 +25,7 @@ def get_where_op(k, v=''):
     if op == 'isnull':
         return '%s is %s' % (k, 'null' if v else 'not null')
     else:
-        return '%s %s %s' % (k, op)
+        return '%s %s %%s' % (k, op)
 
 
 def get_where_sql(where):
