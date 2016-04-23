@@ -1,18 +1,56 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import MySQLdb
+import MySQLdb
 from pymongo import MongoClient
 import settings
 
 
-"""
-def get_select_sql(tabel, keys):
+def get_where_op(k, v=''):
+    where_map = dict(
+            ne='!=',
+            lt='<',
+            lte='<',
+            gt='>',
+            gte='>=',
+            isnull='isnull',
+        )
+    parts = k.rsplit('__', 1)
+    if len(parts) == 2:
+        k, op = parts
+        op = where_map[op]
+    else:
+        k = parts[0]
+        op = 'in' if isinstance(v, (list, tuple)) else '='
+    if op == 'isnull':
+        return '%s is %s' % (k, 'null' if v else 'not null')
+    else:
+        return '%s %s %s' % (k, op)
+
+
+def get_where_sql(where):
+    if isinstance(where, (list, tuple)):
+        where_keys = where
+        where = {x: '' for x in where}
+    else:
+        where_keys = where.keys()
+    return ' and '.join(get_where_op(k, where[k]) for k in where_keys)
+
+
+def get_select_sql(table, keys, where=None, order_by=None, limit=None):
     sql = 'select %s from %s' % (
         ','.join(keys), table
         )
+    if where:
+        sql += ' where ' + get_where_sql(where)
+    if order_by:
+        sql += ' order by ' + order_by
+    if limit:
+        sql += ' limit % ' % limit
+    return sql
 
-def get_insert_sql(table, keys):
+
+def get_insert_sql(table, keys, where=None):
     sql = 'INSERT INTO %s (%s) VALUES (%s)' % (
         table, ', '.join(keys), ', '.join(['%s'] * len(keys))
         )
@@ -37,11 +75,29 @@ class MySQLDal(object):
         uid = cursor.lastrowid
         return int(uid)
 
-    def get(self, table, info):
+    def get(self, table, info, where=None, order_by=None, limit=None):
         cursor = self.mysql_db.cursor()
-        sql = get_select_sql(table, info.keys)
-        cursor.execute(sql, info.values())
-"""
+        sql = get_select_sql(
+                table, info.keys, where=where, order_by=order_by, limit=limit
+                )
+        # where options '__isnull' dont exists `%s`
+        where_values = [
+                v for k, v in where.iteritems() if not k.endswith('__isnull')
+            ]
+        cursor.execute(sql, **where_values)
+        return cursor.fetchall()
+
+    def get_one(self, table, info, where=None, order_by=None, limit=None):
+        cursor = self.mysql_db.cursor()
+        sql = get_select_sql(
+                table, info, where=where, order_by=order_by, limit=limit
+                )
+        # where options '__isnull' dont exists `%s`
+        where_values = [
+                v for k, v in where.iteritems() if not k.endswith('__isnull')
+            ]
+        cursor.execute(sql, **where_values)
+        return cursor.fetchone()
 
 
 class MongoDal(object):

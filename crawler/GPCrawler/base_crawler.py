@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import time
 import random
+import requests
 import redis
 from urlparse import urljoin
 from urlparse import urldefrag
@@ -10,7 +10,7 @@ from HTMLParser import HTMLParser
 import settings
 from login import login
 from dal import MongoDal
-# from dal import MySQLDal
+from dal import MySQLDal
 
 
 class BaseCrawler(object):
@@ -26,7 +26,7 @@ class BaseCrawler(object):
             'Referer': settings.REFERER,
             'User-Agent': settings.USER_AGENT
             }
-        # self.mysql = MySQLDal()
+        self.mysql = MySQLDal()
         self.mongo = MongoDal()
         self.redis = redis.Redis(
             host=settings.REDIS_ADDRESS,
@@ -47,26 +47,35 @@ class BaseCrawler(object):
         """
         pass
 
-    def get_session(self):
-        username = settings.USERS.get('username')
-        password = settings.USERS.get('password')
-        session = login(username, password)
-        return session
+    def start_login(self):
+        while True:
+            account = self.mysql.get_one(
+                    settings.ACCOUNT_TABLE,
+                    ['*', ],
+                    where={'status': 0}
+                    )
+            # headers = login(account['username'], account['password'])
+            if headers is None:
+                # self.mysql.update("account", "status=2", "cid=cid")
+                continue
+            info = dict(
+                    cid=account('cid'),
+                    headers=headers
+                    )
+            return info
 
-    def get_response_from_url(self, url):
+    def get_response_from_url(self, url, headers):
         time.sleep(random.choice(settings.DOWNLOAD_DELAY))
         print 'fetching url: %s' % url
-        session = self.get_session()
-        response = session.get(url)
+        response = requests.get(url, headers=headers)
         print 'status_code: {}'.format(response.status_code)
         if response.status_code != 200:
             print 'status_code：%s. Cookie no longer has any effect.' \
                 % response.status_code
-            sys._exit(0)
+            return None
         if response.url == self.deny_url:
             print 'crawled errer weibo.cn/pub/, retry...'
-            time.sleep(60)
-            self.get_response_from_url(url)
+            return None
         return response
 
     def get_links_from_html(self, html):
