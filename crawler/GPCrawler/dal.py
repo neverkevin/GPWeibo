@@ -84,7 +84,7 @@ class MySQLDal(object):
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
             ]
-        cursor.execute(sql, **where_values)
+        cursor.execute(sql, args=where_values)
         return cursor.fetchall()
 
     def get_one(self, table, info, where=None, order_by=None, limit=None):
@@ -96,7 +96,7 @@ class MySQLDal(object):
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
             ]
-        cursor.execute(sql, **where_values)
+        cursor.execute(sql, args=where_values)
         return cursor.fetchone()
 
 
