@@ -61,7 +61,6 @@ class BaseCrawler(object):
             account = Account(result)
             headers = login(account.username, account.password)
             if headers is None:
-                # self.mysql.update_account_status(account.table status=2)
                 self.update_account_status(account.aid, 1)
                 continue
             info = dict(

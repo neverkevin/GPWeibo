@@ -58,8 +58,9 @@ def get_insert_sql(table, keys, where=None):
 
 
 def get_update_sql(table, update_keys, where):
-    sql = 'update %s set % where %' % (
-            table, ', '.join(x + '=%s' for x in update_keys),
+    sql = 'update %s set %s where %s' % (
+            table,
+            ', '.join(x + '=%s' for x in update_keys),
             get_where_sql(where),
         )
     return sql
