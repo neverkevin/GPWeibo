@@ -8,6 +8,7 @@ from urlparse import urljoin
 from urlparse import urldefrag
 from HTMLParser import HTMLParser
 import settings
+from types.account import Account
 from login import login
 from dal import MongoDal
 from dal import MySQLDal
@@ -21,18 +22,18 @@ class BaseCrawler(object):
 
     def __init__(self):
         self.headers = {
-            'Cookie': settings.COOKIE,
-            'Host': settings.HOST,
-            'Referer': settings.REFERER,
-            'User-Agent': settings.USER_AGENT
+                'Cookie': settings.COOKIE,
+                'Host': settings.HOST,
+                'Referer': settings.REFERER,
+                'User-Agent': settings.USER_AGENT
             }
         self.mysql = MySQLDal()
         self.mongo = MongoDal()
         self.redis = redis.Redis(
-            host=settings.REDIS_ADDRESS,
-            port=settings.REDIS_PORT,
-            password=settings.REDIS_PASSWD,
-            db=settings.REDIS_INDEX
+                host=settings.REDIS_ADDRESS,
+                port=settings.REDIS_PORT,
+                password=settings.REDIS_PASSWD,
+                db=settings.REDIS_INDEX
             )
         self.start()
 
@@ -49,20 +50,32 @@ class BaseCrawler(object):
 
     def start_login(self):
         while True:
-            account = self.mysql.get_one(
+            result = self.mysql.get_one(
                     settings.ACCOUNT_TABLE,
                     ['*', ],
                     where={'status': 0}
-                    )
-            # headers = login(account['username'], account['password'])
+                )
+            if result is None:
+                time.sleep(3600)
+                continue
+            account = Account(result)
+            headers = login(account.username, account.password)
             if headers is None:
-                # self.mysql.update("account", "status=2", "cid=cid")
+                # self.mysql.update_account_status(account.table status=2)
+                self.update_account_status(account.aid, 1)
                 continue
             info = dict(
-                    cid=account('cid'),
+                    aid=account.aid,
                     headers=headers
-                    )
+                )
             return info
+
+    def update_account_status(self, aid, status):
+        self.mysql.update(
+                'account',
+                {'status': status},
+                where={'aid': aid}
+            )
 
     def get_response_from_url(self, url, headers):
         time.sleep(random.choice(settings.DOWNLOAD_DELAY))

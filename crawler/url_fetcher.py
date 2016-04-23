@@ -24,15 +24,15 @@ class UrlFetcher(BaseCrawler):
     deny_url = 'http://weibo.cn/pub/'
 
     def start(self):
-        info = self.login()
+        info = self.start_login()
         for url in self.start_urls:
             self.redis.lpush("weibo_crawl_queue", url)
         while True:
             url = self.redis.lpop("weibo_crawl_queue")
             response = self.get_response_from_url(url, info['headers'])
             if response is None:
-                self.update_account_status(info['cid'], 1)
-                info = self.login()
+                self.update_account_status(info['aid'], 2)
+                info = self.start_login()
                 continue
             urls = self.get_links_from_html(response.text)
             for new_url in urls:

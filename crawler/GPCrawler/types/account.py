@@ -11,9 +11,9 @@ class Account(BaseObject):
         )
 
     def __init__(self, data=None):
-        self.aid = ''
+        self.aid = 0
         self.username = ''
         self.password = ''
-        self.status = ''
+        self.status = -1
 
         BaseObject.__init__(self, data)

@@ -57,6 +57,14 @@ def get_insert_sql(table, keys, where=None):
     return sql
 
 
+def get_update_sql(table, update_keys, where):
+    sql = 'update %s set % where %' % (
+            table, ', '.join(x + '=%s' for x in update_keys),
+            get_where_sql(where),
+        )
+    return sql
+
+
 class MySQLDal(object):
 
     def __init__(self):
@@ -75,12 +83,21 @@ class MySQLDal(object):
         uid = cursor.lastrowid
         return int(uid)
 
+    def update(self, table, info, where=None):
+        cursor = self.mysql_db.cursor()
+        # where option '__isnull' doesn't contain `%s`
+        where_values = [
+                v for k, v in where.iteritems() if not k.endswith('__isnull')
+            ]
+        sql = get_update_sql(table, info.keys(), where)
+        cursor.execute(sql, args=(info.values() + where_values))
+
     def get(self, table, info, where=None, order_by=None, limit=None):
         cursor = self.mysql_db.cursor()
         sql = get_select_sql(
                 table, info.keys, where=where, order_by=order_by, limit=limit
             )
-        # where options '__isnull' dont exists `%s`
+        # where option '__isnull' doesn't contain `%s`
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
             ]
@@ -92,7 +109,7 @@ class MySQLDal(object):
         sql = get_select_sql(
                 table, info, where=where, order_by=order_by, limit=limit
             )
-        # where options '__isnull' dont exists `%s`
+        # where option '__isnull' doesn't contain `%s`
         where_values = [
                 v for k, v in where.iteritems() if not k.endswith('__isnull')
             ]
