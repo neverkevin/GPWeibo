@@ -10,7 +10,7 @@ PWSSWD_WRONG = u'\u767b\u5f55\u540d\u6216\u5bc6\u7801\u9519\u8bef'
 
 
 def login(username, password):
-    """Return session with headers."""
+    """Return headers with cookies."""
     login_url = "https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)"
     username = base64.b64encode(username)
     postdata = {
@@ -40,8 +40,9 @@ def login(username, password):
     cookies = session.cookies.get_dict()
     cookies = [key + "=" + value for key, value in cookies.items()]
     cookies = ";".join(cookies)
-    session.headers["cookie"] = cookies
-    session.headers["Host"] = settings.HOST
-    session.headers["Referer"] = settings.REFERER
-    session.headers["User-Agent"] = settings.USER_AGENT
-    return session
+    headers = {}
+    headers["Cookie"] = cookies
+    headers["Host"] = settings.HOST
+    headers["Referer"] = settings.REFERER
+    headers["User-Agent"] = settings.USER_AGENT
+    return headers 

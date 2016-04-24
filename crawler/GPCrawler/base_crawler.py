@@ -21,12 +21,6 @@ class BaseCrawler(object):
     deny_url = ''
 
     def __init__(self):
-        self.headers = {
-                'Cookie': settings.COOKIE,
-                'Host': settings.HOST,
-                'Referer': settings.REFERER,
-                'User-Agent': settings.USER_AGENT
-            }
         self.mysql = MySQLDal()
         self.mongo = MongoDal()
         self.redis = redis.Redis(
@@ -53,10 +47,10 @@ class BaseCrawler(object):
             result = self.mysql.get_one(
                     settings.ACCOUNT_TABLE,
                     ['*', ],
-                    where={'status': 0}
+                    where={'status': 3}
                 )
             if result is None:
-                time.sleep(3600)
+                time.sleep(600)
                 continue
             account = Account(result)
             headers = login(account.username, account.password)
