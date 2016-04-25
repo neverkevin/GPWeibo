@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """每天重置一次cookie失效的帐号的状态"""
-from GPCrawler.dal import MySQLdb
+from GPCrawler.dal import MySQLDal
 
 
-db = MySQLdb()
+db = MySQLDal()
 db.update(
         'account',
-        {'status', 2},
-        where={'status', 3}
+        dict(status=3),
+        where=dict(status=2)
     )
