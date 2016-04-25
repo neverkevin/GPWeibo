@@ -11,7 +11,7 @@ class BaseObject(object):
     def __init__(self, data=None):
         if data is not None:
             if isinstance(data, tuple):
-                i = 1
+                i = 0
                 for k in self.keyMapping:
                     setattr(self, k, data[i])
                     i += 1
