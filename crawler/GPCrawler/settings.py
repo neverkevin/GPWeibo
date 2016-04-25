@@ -14,7 +14,7 @@ CRAWL_PAGE = 3
 DOWNLOAD_DELAY = [0.5, 1, 2, 3]
 REDIS_QUEUE = True
 
-ACCOUNT_TABLE = 'accuont'
+ACCOUNT_TABLE = 'account'
 # mysql config
 MYSQL_HOST = 'localhost'
 MYSQL_DATABASE_NAME = 'weibo'

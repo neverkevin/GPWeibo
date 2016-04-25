@@ -80,8 +80,9 @@ class MySQLDal(object):
     def insert(self, table, info):
         cursor = self.mysql_db.cursor()
         sql = get_insert_sql(table, info.keys())
-        cursor.execute(sql, info.values())
+        cursor.execute(sql, args=info.values())
         uid = cursor.lastrowid
+        self.mysql_db.commit()
         return int(uid)
 
     def update(self, table, info, where=None):
@@ -93,10 +94,10 @@ class MySQLDal(object):
         sql = get_update_sql(table, info.keys(), where)
         cursor.execute(sql, args=(info.values() + where_values))
 
-    def get(self, table, info, where=None, order_by=None, limit=None):
+    def get(self, table, keys, where=None, order_by=None, limit=None):
         cursor = self.mysql_db.cursor()
         sql = get_select_sql(
-                table, info.keys, where=where, order_by=order_by, limit=limit
+                table, keys, where=where, order_by=order_by, limit=limit
             )
         # where option '__isnull' doesn't contain `%s`
         where_values = [
@@ -105,10 +106,10 @@ class MySQLDal(object):
         cursor.execute(sql, args=where_values)
         return cursor.fetchall()
 
-    def get_one(self, table, info, where=None, order_by=None, limit=None):
+    def get_one(self, table, keys, where=None, order_by=None, limit=None):
         cursor = self.mysql_db.cursor()
         sql = get_select_sql(
-                table, info, where=where, order_by=order_by, limit=limit
+                table, keys, where=where, order_by=order_by, limit=limit
             )
         # where option '__isnull' doesn't contain `%s`
         where_values = [
