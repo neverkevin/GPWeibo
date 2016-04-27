@@ -4,6 +4,7 @@
 import requests
 import json
 import base64
+import logging
 import settings
 
 PWSSWD_WRONG = u'\u767b\u5f55\u540d\u6216\u5bc6\u7801\u9519\u8bef'
@@ -34,9 +35,9 @@ def login(username, password):
     res = session.post(login_url, data=postdata)
     res_content = json.loads(res.content)
     if res_content['retcode'] != '0':
-        print 'login error, reason' % res_content['reason']
+        logging.warning('login error, reason: %s', res_content['reason'])
         return None
-    print 'login success!'
+    logging.info('login success!')
     cookies = session.cookies.get_dict()
     cookies = [key + "=" + value for key, value in cookies.items()]
     cookies = ";".join(cookies)
@@ -45,4 +46,4 @@ def login(username, password):
     headers["Host"] = settings.HOST
     headers["Referer"] = settings.REFERER
     headers["User-Agent"] = settings.USER_AGENT
-    return headers 
+    return headers

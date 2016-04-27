@@ -2,6 +2,7 @@
 
 import time
 import random
+import logging
 import requests
 import redis
 from urlparse import urljoin
@@ -72,15 +73,17 @@ class BaseCrawler(object):
 
     def get_response_from_url(self, url, headers):
         time.sleep(random.choice(settings.DOWNLOAD_DELAY))
-        print 'fetching url: %s' % url
+        logging.info('fetching url: %s', url)
         response = requests.get(url, headers=headers)
-        print 'status_code: {}'.format(response.status_code)
+        # print 'status_code: {}'.format(response.status_code)
         if response.status_code != 200:
-            print 'status_code：%s. Cookie no longer has any effect.' \
-                % response.status_code
+            logging.warning(
+                'status_code：%s. Cookie no longer has any effect.',
+                response.status_code
+                )
             return None
         if response.url == self.deny_url:
-            print 'crawled errer weibo.cn/pub/, retry...'
+            logging.warning('crawled errer weibo.cn/pub/, retry...')
             return None
         return response
 

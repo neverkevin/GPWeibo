@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import logging
 from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.types.user import User
@@ -31,21 +32,24 @@ class WeiboCrawler(BaseCrawler):
         info = self.start_login()
         for url in self.start_urls:
             self.redis.lpush("weibo_crawl_queue", url)
-        while True:
-            url = self.redis.lpop("weibo_crawl_queue")
-            response = self.get_response_from_url(url, info['headers'])
-            if response is None:
-                self.update_account_status(info['aid'], 2)
-                info = self.start_login()
-                continue
-            if self.if_parse(url) and not self.redis.sismember('weibo_crawled_queue', url):
-                self.parse(response, info)
-                self.redis.sadd('weibo_crawled_queue', url)
+        try:
+            while True:
+                url = self.redis.lpop("weibo_crawl_queue")
+                response = self.get_response_from_url(url, info['headers'])
+                if response is None:
+                    self.update_account_status(info['aid'], 2)
+                    info = self.start_login()
+                    continue
+                if self.if_parse(url) and not self.redis.sismember('weibo_crawled_queue', url):
+                    self.parse(response, info)
+                    self.redis.sadd('weibo_crawled_queue', url)
 
-            urls = self.get_links_from_html(response.text)
-            for new_url in urls:
-                if self.if_follow(new_url) and not self.redis.sismember('weibo_crawled_queue', new_url):
-                    self.redis.lpush("weibo_crawl_queue", new_url)
+                urls = self.get_links_from_html(response.text)
+                for new_url in urls:
+                    if self.if_follow(new_url) and not self.redis.sismember('weibo_crawled_queue', new_url):
+                        self.redis.lpush("weibo_crawl_queue", new_url)
+        except:
+            logging.exception('crawler run error')
 
     def if_parse(self, url):
         if USER.search(url):
@@ -59,7 +63,7 @@ class WeiboCrawler(BaseCrawler):
 
     def parse(self, response, info):
         selector = etree.HTML(response.content)
-        print 'response.url: %s' % response.url
+        logging.info('response url %s', response.url)
         user = User()
         user.name = selector.xpath('//title/text()')[0][:-3]
         data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
@@ -67,7 +71,8 @@ class WeiboCrawler(BaseCrawler):
             message = data[1]
         else:
             message = data[0].split(u'\xa0')[1]
-        user.sex = message.split('/')[0]
+        sex_message = message.split('/')[0].replace(u'\xa0', '')
+        user.sex = sex_message
         user.area = message.split('/')[1].split(' ')[0]
         num = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
         user.cnum = self.get_num(num)
@@ -78,8 +83,10 @@ class WeiboCrawler(BaseCrawler):
         total_page = selector.xpath('//input[@name="mp"]/@value')
         total_page = total_page[0] if total_page else 1
         user.contents = self.get_contents(response.url, int(total_page), info)
-        print 'Info: crawled weibo user: {}, sex: {}, area: {}, cnum: {}, follows: {}, fans: {}'.format(
-                user.name, user.sex, user.area, user.cnum, user.follows, user.fans)
+        logging.info(
+                'crawled weibo user: %s, sex: %s, area %s, cnum %s, follows %s, fans %s',
+                user.name, user.sex, user.area, user.cnum, user.follows, user.fans
+            )
         self.mongo.insert(user.__dict__)
 
     def get_contents(self, url, total_page, info):
@@ -106,10 +113,13 @@ class WeiboCrawler(BaseCrawler):
             if u'class' and u'id' in div.attrs.keys() and u'c' in div.attrs[u'class']:
                 s_text = div.span.text
                 ct = div.find_all('span')[-1].text.split(' ')
-                # 十分钟前，特殊情况待处理
+                if len(ct) < 2:
+                    continue
                 ct_date = ct[0]
-                ct_time = ct[1].split(u'\xa0')[0]
-                ct_from = ct[1].split(u'xa0')[1]
+                try:
+                    ct_time = ct[1].split(u'\xa0')[0]
+                except:
+                    logging.warning('ct info: %s', s_text)
                 a_info = div.find_all('a')
                 for a in a_info:
                     a_text = a.text
@@ -123,7 +133,6 @@ class WeiboCrawler(BaseCrawler):
                             s_text=s_text,
                             ct_date=ct_date,
                             ct_time=ct_time,
-                            ct_from=ct_from,
                             attitude=attitude,
                             repost=repost,
                             comment=comment
@@ -134,10 +143,23 @@ class WeiboCrawler(BaseCrawler):
     def get_num(self, data):
         """Get num in `abc[123]`."""
         data = NUM_PATTERN.findall(data)
-        if data[0]:
+        if data:
             return data[0]
         return ''
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+        datefmt='%a, %d %b %Y %H:%M:%S',
+        filename='crawler.log',
+        filemode='w'
+    )
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
     crawler = WeiboCrawler()
