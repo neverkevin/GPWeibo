@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+import datetime
 import logging
 from lxml import etree
 from bs4 import BeautifulSoup
 from GPCrawler.types.user import User
+from GPCrawler.types.contents import Contents
 from GPCrawler import settings
 from GPCrawler.base_crawler import BaseCrawler
 
@@ -13,8 +15,8 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 NUM_PATTERN = re.compile('\[(\d+)\]')
+WID = re.compile('\d+')
 USER = re.compile('/u/\d+$')
 FANS = re.compile('/fans$')
 FANS_PAGE = re.compile('/fans?page=\d+$')
@@ -65,6 +67,7 @@ class WeiboCrawler(BaseCrawler):
         selector = etree.HTML(response.content)
         logging.info('response url %s', response.url)
         user = User()
+        user.wid = WID.findall(response.url)[0]
         user.name = selector.xpath('//title/text()')[0][:-3]
         data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
         if len(data) != 1:
@@ -82,17 +85,16 @@ class WeiboCrawler(BaseCrawler):
         user.fans = self.get_num(fans)
         total_page = selector.xpath('//input[@name="mp"]/@value')
         total_page = total_page[0] if total_page else 1
-        user.contents = self.get_contents(response.url, int(total_page), info)
+        self.mongo.insert_one(user.table, user.__dict__)
         logging.info(
-                'crawled weibo user: %s, sex: %s, area %s, cnum %s, follows %s, fans %s',
-                user.name, user.sex, user.area, user.cnum, user.follows, user.fans
+                'crawled weibo user: %s, wid: %s, sex: %s, area %s, cnum %s, follows %s, fans %s',
+                user.name, user.wid, user.sex, user.area, user.cnum, user.follows, user.fans,
             )
-        self.mongo.insert(user.__dict__)
+        self.get_contents(response.url, int(total_page), info, user.wid)
 
-    def get_contents(self, url, total_page, info):
+    def get_contents(self, url, total_page, info, wid):
         """下载用户原创微博页面"""
         page = min(settings.CRAWL_PAGE, total_page) + 1
-        contents = []
         for i in range(1, page):
             content_url = url + '?filter=1&page=%s' % i
             response = self.get_response_from_url(content_url, info['headers'])
@@ -100,45 +102,46 @@ class WeiboCrawler(BaseCrawler):
                 self.update_account_status(info['aid'], 2)
                 info = self.start_login()
                 continue
-            content = self.parse_page(response)
-            contents.extend(content)
-        return contents
+            self.parse_page(response, wid)
 
-    def parse_page(self, response):
+    def parse_page(self, response, wid):
         """解析页面中的微博正文"""
         page = BeautifulSoup(response.text, 'lxml')
         divs = page.find_all('div')
-        content = []
         for div in divs:
             if u'class' and u'id' in div.attrs.keys() and u'c' in div.attrs[u'class']:
-                s_text = div.span.text
+                content = Contents()
+                content.wid = wid
+                content.content = div.span.text
                 ct = div.find_all('span')[-1].text.split(' ')
                 if len(ct) < 2:
                     continue
-                ct_date = ct[0]
-                try:
-                    ct_time = ct[1].split(u'\xa0')[0]
-                except:
-                    logging.warning('ct info: %s', s_text)
+                content.ct_date = self.get_date(ct[0])
+                content.ct_time = ct[1][:5]
                 a_info = div.find_all('a')
                 for a in a_info:
                     a_text = a.text
                     if '赞' in a_text:
-                        attitude = self.get_num(a_text)
+                        content.attitude = self.get_num(a_text)
                     elif '转发' in a_text:
-                        repost = self.get_num(a_text)
+                        content.repost = self.get_num(a_text)
                     elif '评论' in a_text:
-                        comment = self.get_num(a_text)
-                content.append(dict(
-                            s_text=s_text,
-                            ct_date=ct_date,
-                            ct_time=ct_time,
-                            attitude=attitude,
-                            repost=repost,
-                            comment=comment
-                        )
-                    )
-        return content
+                        content.comment = self.get_num(a_text)
+                self.mongo.insert_one(content.table, content.__dict__)
+
+    def get_date(self, date):
+        """统一'今天'，'4月6日'格式化为'2016-1-1'."""
+        t = datetime.datetime.now()
+        to_year = t.year
+        to_month = t.month
+        to_day = t.day
+        if date == u'今天':
+            return '%s-%s-%s' % (to_year, to_month, to_day)
+        elif u'月' in date:
+            nu = re.findall('\d+', date)
+            return '%s-%s-%s' % (to_year, nu[0], nu[1])
+        else:
+            return date
 
     def get_num(self, data):
         """Get num in `abc[123]`."""

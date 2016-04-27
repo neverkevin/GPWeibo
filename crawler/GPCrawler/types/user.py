@@ -8,8 +8,8 @@ class User(BaseObject):
     table = 'user'
     keyMapping = (
             'name', 'sex', 'area', 'cnum',
-            'follows', 'fans', 'contents'
-            )
+            'follows', 'fans',
+        )
 
     def __init__(self, data=None):
         self.name = ''
@@ -18,6 +18,6 @@ class User(BaseObject):
         self.cnum = ''
         self.follows = ''
         self.fans = ''
-        self.contents = []
+        self.wid = ''
 
         BaseObject.__init__(self, data)

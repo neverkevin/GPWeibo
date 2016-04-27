@@ -127,7 +127,7 @@ class MongoDal(object):
                 settings.MONGO_PORT
             )
 
-    def insert(self, info):
+    def insert_one(self, table, info):
         db = self.mongo_db.weibo
-        collections = db.weibo
-        collections.insert(info)
+        collections = db[table]
+        collections.insert_one(info)
