@@ -17,8 +17,10 @@ MYSQL_USER_NAME = 'root'
 MYSQL_PASS_WORD = 'ssdut'
 
 # mongo config
-MONGO_HOST = 'localhost'
+MONGO_HOST = 'your mongo server address'
 MONGO_PORT = 27017
+MONGO_USER = ''
+MONGO_PASSWD = ''
 
 # redis config
 REDIS_ADDRESS = '127.0.0.1'

@@ -126,6 +126,11 @@ class MongoDal(object):
                 settings.MONGO_HOST,
                 settings.MONGO_PORT
             )
+        self.auth()
+
+    def auth(self):
+        db = self.mongo_db.admin
+        db.authenticate(settings.MONGO_USER, settings.MONGO_PASSWD)
 
     def insert_one(self, table, info):
         db = self.mongo_db.weibo
