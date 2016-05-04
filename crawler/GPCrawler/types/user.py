@@ -5,7 +5,8 @@ from base_object import BaseObject
 
 class User(BaseObject):
 
-    table = 'user'
+    table = 'weibo'
+    collection = 'user'
     keyMapping = (
             'name', 'sex', 'area', 'cnum',
             'follows', 'fans',
@@ -15,9 +16,9 @@ class User(BaseObject):
         self.name = ''
         self.sex = ''
         self.area = ''
-        self.cnum = ''
-        self.follows = ''
-        self.fans = ''
-        self.wid = ''
+        self.cnum = 0
+        self.follows = 0
+        self.fans = 0
+        self.wid = 0
 
         BaseObject.__init__(self, data)

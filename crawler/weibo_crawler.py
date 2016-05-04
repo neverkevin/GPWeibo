@@ -27,7 +27,7 @@ FOLLOW_PAGE = re.compile('/follow?page=\d+$')
 class WeiboCrawler(BaseCrawler):
 
     domain = 'http://weibo.cn'
-    start_urls = ('http://weibo.cn',)
+    start_urls = ('http://weibo.cn', )
     deny_url = 'http://weibo.cn/pub/'
 
     def start(self):
@@ -43,8 +43,8 @@ class WeiboCrawler(BaseCrawler):
                     info = self.start_login()
                     continue
                 if self.if_parse(url) and not self.redis.sismember('weibo_crawled_queue', url):
-                    self.parse(response, info)
                     self.redis.sadd('weibo_crawled_queue', url)
+                    self.parse(response, info)
 
                 urls = self.get_links_from_html(response.text)
                 for new_url in urls:
@@ -67,18 +67,18 @@ class WeiboCrawler(BaseCrawler):
         selector = etree.HTML(response.content)
         logging.info('response url %s', response.url)
         user = User()
-        user.wid = WID.findall(response.url)[0]
+        user.wid = int(WID.findall(response.url)[0])
         user.name = selector.xpath('//title/text()')[0][:-3]
-        data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
-        if len(data) != 1:
-            message = data[1]
+        user_data = selector.xpath('//div[@class="u"]/table/tr/td[2]/div/span[1]/text()')
+        if len(user_data) > 1:
+            message = user_data[1]
         else:
-            message = data[0].split(u'\xa0')[1]
+            message = user_data[0].split(u'\xa0')[1]
         sex_message = message.split('/')[0].replace(u'\xa0', '')
         user.sex = sex_message
         user.area = message.split('/')[1].split(' ')[0]
-        num = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
-        user.cnum = self.get_num(num)
+        cnum = selector.xpath('//div[@class="tip2"]/span[@class="tc"]/text()')[0]
+        user.cnum = self.get_num(cnum)
         follows = selector.xpath('//div[@class="tip2"]/a/text()')[0]
         user.follows = self.get_num(follows)
         fans = selector.xpath('//div[@class="tip2"]/a/text()')[1]
@@ -147,8 +147,8 @@ class WeiboCrawler(BaseCrawler):
         """Get num in `abc[123]`."""
         data = NUM_PATTERN.findall(data)
         if data:
-            return data[0]
-        return ''
+            return int(data[0])
+        return 0
 
 
 if __name__ == '__main__':
