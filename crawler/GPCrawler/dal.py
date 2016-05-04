@@ -132,7 +132,7 @@ class MongoDal(object):
         db = self.mongo_db.admin
         db.authenticate(settings.MONGO_USER, settings.MONGO_PASSWD)
 
-    def insert_one(self, table, info):
-        db = self.mongo_db.weibo
-        collections = db[table]
+    def insert_one(self, table, collection, info):
+        db = self.mongo_db[table]
+        collections = db[collection]
         collections.insert_one(info)

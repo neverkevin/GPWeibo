@@ -85,7 +85,7 @@ class WeiboCrawler(BaseCrawler):
         user.fans = self.get_num(fans)
         total_page = selector.xpath('//input[@name="mp"]/@value')
         total_page = total_page[0] if total_page else 1
-        self.mongo.insert_one(user.table, user.__dict__)
+        self.mongo.insert_one(user.table, user.collection, user.__dict__)
         logging.info(
                 'crawled weibo user: %s, wid: %s, sex: %s, area %s, cnum %s, follows %s, fans %s',
                 user.name, user.wid, user.sex, user.area, user.cnum, user.follows, user.fans,
