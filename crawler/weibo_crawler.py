@@ -47,6 +47,7 @@ class WeiboCrawler(BaseCrawler):
                     self.parse(response, info)
 
                 urls = self.get_links_from_html(response.text)
+                urls = list(set(urls))
                 for new_url in urls:
                     if self.if_follow(new_url) and not self.redis.sismember('weibo_crawled_queue', new_url):
                         self.redis.lpush("weibo_crawl_queue", new_url)
