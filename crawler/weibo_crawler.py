@@ -165,5 +165,5 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
-
     crawler = WeiboCrawler()
+    crawler.start()

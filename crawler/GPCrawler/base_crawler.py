@@ -30,7 +30,6 @@ class BaseCrawler(object):
                 password=settings.REDIS_PASSWD,
                 db=settings.REDIS_INDEX
             )
-        self.start()
 
     def start(self):
         """Override to start crawler."""
