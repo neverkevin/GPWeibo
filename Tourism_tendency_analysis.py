@@ -5,6 +5,7 @@ import sys
 import time
 import jieba
 import codecs
+import logging
 import threading
 from Queue import Queue
 from crawler.GPCrawler.dal import MongoDal
@@ -105,14 +106,24 @@ class ResultSaver(threading.Thread):
         self.db.insert_one(
                 'weibo', 'sights_tendency', sight
                 )
-        print 'analysed: name %s, area %s, sight %s' % (
-                sight['name'],
-                sight['area'],
-                sight['sight']
+        logging.info(
+                'analysed: name %s, area %s, sight %s',
+                sight['name'], sight['area'], sight['sight']
             )
 
-
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+        datefmt='%a, %d %b %Y %H:%M:%S',
+        filename='analysed.log',
+        filemode='w'
+        )
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
     worker_queue = Queue(5000000)
     analysis_queue = Queue(3000)
     with codecs.open('sight.txt', 'r', 'utf-8') as f:
@@ -134,7 +145,8 @@ if __name__ == '__main__':
     for t in threads:
         t.start()
     while True:
-        print 'worker size: %s, analyst size: %s ' % (
+        logging.info(
+                'worker size: %s, analyst size: %s ',
                 worker_queue.qsize(),
                 analysis_queue.qsize()
             )
