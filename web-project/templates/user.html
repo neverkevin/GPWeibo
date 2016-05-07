@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>weibo users</title>
+    <!-- Bootstrap core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/jumbotron-narrow.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+    <!-- Bootstrap theme -->
+    <!-- Custom styles for this template -->
+  </head>
+  <body>
+    <div class='container'>
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation" class="active"><a href="#">Home</a></li>
+            <li role="presentation"><a href="/user">user</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">GPWeibo</h3>
+      </div>
+      <label class='btn btn-default'>当前用户总数：{{ uc }}</label>
+      <label class='btn btn-default'>当前语料总数： {{ cc }}</label>
+      <table class='table table-striped'>
+        <thead>
+          <tr>
+            <th>wid</th>
+            <th>name</th>
+            <th>area</th>
+            <th>cnum</th>
+            <th>fans</th>
+            <th>follows</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ escape(user['wid']) }}</td>
+            <td><a href="/user/{{ user['wid'] }}" target="_blank">{{ escape(user['name']) }}</a></td>
+            <td>{{ escape(user['area']) }}</td>
+            <td>{{ escape(user['cnum']) }}</td>
+            <td>{{ escape(user['fans']) }}</td>
+            <td>{{ escape(user['follows']) }}</td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+    <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.js"></script>
+    <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </body>
+</html>

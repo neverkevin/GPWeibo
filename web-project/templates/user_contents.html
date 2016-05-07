@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>users contents</title>
+    <!-- Bootstrap core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/jumbotron-narrow.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+    <!-- Bootstrap theme -->
+    <!-- Custom styles for this template -->
+  </head>
+  <body>
+    <div class='container'>
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation" class="active"><a href="#">Home</a></li>
+            <li role="presentation"><a href="/user">user</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">GPWeibo</h3>
+      </div>
+      <table class='table table-striped'>
+        <thead>
+          <tr>
+            <th>content</th>
+            <th>comment</th>
+            <th>repost</th>
+            <th>attitude</th>
+            <th>ct_date</th>
+            <th>ct_time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for content in contents%}
+          <tr>
+            <td>{{ escape(content['content']) }}</td>
+            <td>{{ escape(content['comment']) }}</td>
+            <td>{{ escape(content['repost']) }}</td>
+            <td>{{ escape(content['attitude']) }}</td>
+            <td>{{ escape(content['ct_date']) }}</td>
+            <td>{{ escape(content['ct_time']) }}</td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+    <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.js"></script>
+    <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </body>
+</html>
