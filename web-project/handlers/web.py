@@ -24,3 +24,9 @@ class UsercontentHandler(BaseHandler):
         db = self.mongo_db.weibo
         contents = db.contents.find({'wid': str(wid)})
         self.render('user_contents.html', contents=contents)
+
+
+@route(r'/show$', name='show')
+class ShowHandler(BaseHandler):
+    def get(self):
+        self.render('sights_dentency.html')

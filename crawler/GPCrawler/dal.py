@@ -136,17 +136,21 @@ class MongoDal(object):
         collection = self.get_collection(table, collection)
         collection.insert_one(info)
 
-    def find(self, table, collection, info=None):
+    def find(self, table, collection, info=None, *arg):
         collection = self.get_collection(table, collection)
         if info is None:
             return collection.find()
-        return collection.find(info)
+        return collection.find(info, *arg)
 
-    def find_one(self, table, collection, info=None):
+    def find_one(self, table, collection, info=None, *arg):
         collection = self.get_collection(table, collection)
         if info is None:
             return collection.find_one()
-        return collection.find_one(info)
+        return collection.find_one(info, *arg)
+
+    def aggregate(self, table, collection, info):
+        collection = self.get_collection(table, collection)
+        return collection.aggregate(info)
 
     def get_collection(self, table, collection):
         db = self.mongo_db[table]
