@@ -37,6 +37,8 @@ def get_user_contents(info):
 
 @gen.coroutine
 def query_sights(filter):
+    if not filter:
+        filter = None
     return mongo.distinct(
         'weibo', 'sights_tendency', 'sight', filter=filter
         )
