@@ -136,6 +136,10 @@ class MongoDal(object):
         collection = self.get_collection(table, collection)
         collection.insert_one(info)
 
+    def count(self, table, collection):
+        collection = self.get_collection(table, collection)
+        return collection.count()
+
     def find(self, table, collection, info=None, *arg):
         collection = self.get_collection(table, collection)
         if info is None:

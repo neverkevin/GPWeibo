@@ -4,10 +4,10 @@ import tornado.web
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def mongo_db(self):
-        """An alias for `self.application.mongo_db`."""
-        return self.application.mongo_db
+    # @property
+    # def mongo_db(self):
+    #     """An alias for `self.application.mongo_db`."""
+    #     return self.application.mongo_db
 
     def get_current_user(self):
         username = self.get_secure_cookie("user")

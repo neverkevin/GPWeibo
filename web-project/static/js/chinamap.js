@@ -134,7 +134,7 @@ function Map() {
                 var area = china[state]['name'];
                 _xsrf = $("input[name='_xsrf']").val();
                 $.ajax({
-                    url: '/show',
+                    url: '/sights',
                     type: 'POST',
                     data: {
                         'area': area,

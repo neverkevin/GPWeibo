@@ -1,0 +1,14 @@
+<div class="header clearfix">
+  <nav>
+    <ul class="nav nav-pills pull-right">
+      {% for tag in tags %}
+        {% if tag.has_key('active') %} 
+          <li role="presentation" class="active"><a href="{{ tag['url'] }}">{{ tag['name'] }}</a></li>
+        {% else %}
+          <li role="presentation"><a href="{{ tag['url'] }}">{{ tag['name'] }}</a></li>
+        {% end %}
+      {% end %}
+    </ul>
+  </nav>
+  <h3 class="text-muted">GPWeibo</h3>
+</div>

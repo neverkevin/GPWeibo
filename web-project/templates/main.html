@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+        {% block title %}{% end %}
+        <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet">
+        <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.css" rel="stylesheet">
+        <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/css/jumbotron-narrow.css" type="text/css" media="screen" title="no title" charset="utf-8">
+        {% block head_link %}{% end %}
+    </head>
+    <body>
+        <div class='container'>
+            {% module MainNav(url) %}
+            {% block container %}{% end %}
+        </div>
+        <footer>
+            <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.js"></script>
+            <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.min.js"></script>
+            <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+            <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+            {% block footer %}{% end %}
+        </footer>
+    </body>
+</html>

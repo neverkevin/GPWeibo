@@ -13,8 +13,8 @@ ACCOUNT_TABLE = 'account'
 # mysql config
 MYSQL_HOST = 'localhost'
 MYSQL_DATABASE_NAME = 'weibo'
-MYSQL_USER_NAME = 'root'
-MYSQL_PASS_WORD = 'root'
+MYSQL_USER_NAME = ''
+MYSQL_PASS_WORD = ''
 
 # mongo config
 MONGO_HOST = ''

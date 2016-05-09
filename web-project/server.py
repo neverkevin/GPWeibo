@@ -3,13 +3,12 @@
 
 import os.path
 
-import torndb
 import tornado.ioloop
 import tornado.options
 import tornado.web
 from tornado.options import define, options
-from pymongo import MongoClient
 
+import uimodules
 import settings
 from operations.routes import route
 
@@ -29,18 +28,10 @@ class Application(tornado.web.Application):
             xsrf_cookies=True,
             login_url=settings.LOGIN_URL,
             debug=options.debug,
+            ui_modules=uimodules,
             webmaster=settings.WEBMASTER,
             admin_emails=settings.ADMIN_EMAILS,
         )
-        self.mongo_db = MongoClient(
-                settings.MONGO_HOST,
-                settings.MONGO_PORT
-            )
-        self.mongo_admin = self.mongo_db.admin
-        self.mongo_admin.authenticate(
-                settings.MONGO_USER,
-                settings.MONGO_PASSWD
-            )
         tornado.web.Application.__init__(self, handlers, **server_settings)
 
 
