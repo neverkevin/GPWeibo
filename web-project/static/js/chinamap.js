@@ -141,6 +141,9 @@ function Map() {
                         '_xsrf': _xsrf,
                     },
                     success: function(sights) {
+                        $("#select_prov").val(area);
+                        $("#select_month").val('');
+                        $("#time").val('');
                         weight_list = sights['weight'];
                         color_list = sights['color'];
                         WordCloud(document.getElementById('my_canvas'),

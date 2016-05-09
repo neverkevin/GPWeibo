@@ -11,6 +11,13 @@ from operations.routes import route
 COLORS = ['EE1601', 'D88101', '2F9D66', '78BA01']
 
 
+@route(r'/', name='index')
+class MainHander(BaseHandler):
+    def get(self):
+        url = self.request.uri
+        self.render('index.html', url=url)
+
+
 @route(r'/user$', name='user')
 class UserHandler(BaseHandler):
     @gen.coroutine
@@ -42,10 +49,39 @@ class ShowHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        area = self.get_argument('area')
-        sights = yield model.get_sights_by_area(area)
+        data = self.request.arguments
+        query = get_query_filter(data)
+        sights = yield model.query_sights(query)
         color = dict()
         for s in sights:
             color[s] = random.choice(COLORS)
         weight = [[s, 8+i] for i, s in enumerate(sights)]
         self.write(dict(color=color, weight=weight))
+
+
+def get_query_filter(data):
+    area = data.get('area', [''])[0]
+    month = data.get('month', [''])[0]
+    time = data.get('time', [''])[0]
+    query = dict()
+    time_filter = get_time_shuttle(time)
+    if area:
+        query['area'] = area
+    if month:
+        query['month'] = int(month)
+    if time_filter:
+        query.update(time_filter)
+    return query
+
+
+def get_time_shuttle(time):
+    if not time:
+        return None
+    elif time == 'morning':
+        return {'hour': {'$gt': 6, '$lte': 10}}
+    elif time == 'noon':
+        return {'hour': {'$gt': 10, '$lte': 14}}
+    elif time == 'afternoon':
+        return {'hour': {'$gt': 14, '$lte': 19}}
+    elif time == 'evening':
+        return {'$or': [{'hour': {'$gt': 19}}, {'hour': {'$lte': 6}}]}

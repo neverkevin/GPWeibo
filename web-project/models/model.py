@@ -36,7 +36,7 @@ def get_user_contents(info):
 
 
 @gen.coroutine
-def get_sights_by_area(area):
+def query_sights(filter):
     return mongo.distinct(
-        'weibo', 'sights_tendency', 'sight', filter={'area': area}
+        'weibo', 'sights_tendency', 'sight', filter=filter
         )
