@@ -129,6 +129,37 @@ function Map() {
                 if (china[current] === undefined) return;
 
                 $("#topList").find("[title='" + china[current]['name'] + "']").click();
+                
+                //查询省份信息
+                var area = china[state]['name'];
+                _xsrf = $("input[name='_xsrf']").val();
+                $.ajax({
+                    url: '/show',
+                    type: 'POST',
+                    data: {
+                        'area': area,
+                        '_xsrf': _xsrf,
+                    },
+                    success: function(sights) {
+                        weight_list = sights['weight'];
+                        color_list = sights['color'];
+                        WordCloud(document.getElementById('my_canvas'),
+                                {list: weight_list,
+                                    gridSize: 5,
+                                    weightFactor:2,
+                                    fontFamily: 'Average, Times, serif',
+                                    color: function(word){
+                                        colorStr = color_list[word];
+                                        rColor = parseInt(colorStr.substr(0,2), 16);
+                                        gColor = parseInt(colorStr.substr(2,2), 16);
+                                        bColor = parseInt(colorStr.substr(4,2), 16);
+                                        return "RGB("+[rColor, gColor, bColor].join(",") + ")";
+                                    },
+                                    rotateRatio: 0,
+                                }
+                        );
+                    }
+                });
             }
         })
 

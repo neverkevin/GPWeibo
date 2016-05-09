@@ -11,6 +11,7 @@
     <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.css" rel="stylesheet">
     <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/jumbotron-narrow.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/static/css/sights_dentency.css" type="text/css" media="screen" title="no title" charset="utf-8">
 </head>
 <body>
     <div class='container'>
@@ -24,8 +25,15 @@
         </nav>
         <h3 class="text-muted">GPWeibo</h3>
       </div>
-      <div id="ChinaMap">
-          <div id="map"></div>
+      <div class="row">
+        <div id="ChinaMap">
+            {% module xsrf_form_html() %}
+            <div id="map"></div>
+        </div>
+        <div>
+          <canvas style="cursor:pointer; float:left; margin-top: 30px;" id="my_canvas" width="320", height="280">
+          </canvas>
+        </div>
       </div>
     </div>
 
@@ -33,76 +41,9 @@
     <script src="//cdn.bootcss.com/jquery/1.10.1/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="//cdn.bootcss.com/wordcloud2.js/1.0.4/wordcloud2.js"></script>
     <script src="/static/js/raphael.js"></script>
     <script src="/static/js/chinamapPath.js"></script>
     <script src="/static/js/chinamap.js"></script>
-    <style type="text/css">
-        #ChinaMap {
-            padding-right: 0px;
-            padding-left: 0px;
-            padding-bottom: 0px;
-            margin: 0px auto;
-            /*width: 100%;*/
-            padding-top: 10px;
-            position: relative;
-            /*text-align: center;*/
-        }
-
-        #tiplayer {
-            padding-right: 5px;
-            padding-left: 5px;
-            z-index: 1000;
-            min-height: 1em;
-            background: #000;
-            max-width: 250px;
-            padding-bottom: 5px;
-            font: 12px 'Microsoft YaHei',Arial,????,Tahoma,Sans-Serif;
-            color: #fff;
-            padding-top: 5px;
-            position: absolute;
-            text-align: left;
-            word-wrap: break-word;
-            -moz-border-radius: 3px;
-            -khtml-border-radius: 3px;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
-        }
-
-        .ToolTip {
-            padding-right: 5px;
-            padding-left: 5px;
-            z-index: 1000;
-            min-height: 1em;
-            background: #000;
-            max-width: 350px;
-            padding-bottom: 5px;
-            font: 12px 'Microsoft YaHei',Arial,????,Tahoma,Sans-Serif;
-            color: #fff;
-            padding-top: 5px;
-            position: absolute;
-            text-align: left;
-            word-wrap: break-word;
-            -moz-border-radius: 3px;
-            -khtml-border-radius: 3px;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
-        }
-
-        .ToolTip {
-            border-right: #c5b270 1px solid;
-            padding-right: 15px;
-            border-top: #c5b270 1px solid;
-            padding-left: 15px;
-            background: #fffbd6;
-            padding-bottom: 0px;
-            border-left: #c5b270 1px solid;
-            color: #bb861c;
-            line-height: 30px;
-            padding-top: 0px;
-            border-bottom: #c5b270 1px solid;
-            top: 30px;
-        }
-    </style>
-
 </body>
 </html>

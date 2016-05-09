@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+import random
+from tornado import gen
 from operations.routes import route
 from base_handler import BaseHandler
 
+COLORS = ['EE1601', 'D88101', '2F9D66', '78BA01']
 
 @route(r'/user$', name='user')
 class UserHandler(BaseHandler):
@@ -30,3 +33,13 @@ class UsercontentHandler(BaseHandler):
 class ShowHandler(BaseHandler):
     def get(self):
         self.render('sights_dentency.html')
+
+    @gen.coroutine
+    def post(self):
+        area = self.get_argument('area')
+        result = self.mongo_db.weibo.sights_tendency.distinct('sight', {'area': area})
+        color = dict()
+        for r in result:
+            color[r] = random.choice(COLORS)
+        weight = [[r, 8+i] for i, r in enumerate(result)]
+        self.write(dict(color=color, weight=weight))

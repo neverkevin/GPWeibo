@@ -152,6 +152,10 @@ class MongoDal(object):
         collection = self.get_collection(table, collection)
         return collection.aggregate(info)
 
+    def distinct(self, table, collection, key, filter=None):
+        collection = self.get_collection(table, collection)
+        return collection.distinct(key, filter)
+
     def get_collection(self, table, collection):
         db = self.mongo_db[table]
         return db[collection]
