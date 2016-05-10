@@ -3,6 +3,7 @@
 
 import os.path
 
+import redis
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -32,6 +33,12 @@ class Application(tornado.web.Application):
             webmaster=settings.WEBMASTER,
             admin_emails=settings.ADMIN_EMAILS,
         )
+        self.redis = redis.Redis(
+                host=settings.REDIS_ADDRESS,
+                port=settings.REDIS_PORT,
+                password=settings.REDIS_PASSWD,
+                db=settings.REDIS_INDEX
+                )
         tornado.web.Application.__init__(self, handlers, **server_settings)
 
 
