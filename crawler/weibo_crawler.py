@@ -128,7 +128,7 @@ class WeiboCrawler(BaseCrawler):
                         content.repost = self.get_num(a_text)
                     elif '评论' in a_text:
                         content.comment = self.get_num(a_text)
-                self.mongo.insert_one(content.table, content.__dict__)
+                self.mongo.insert_one(content.table, content.collection, content.__dict__)
 
     def get_date(self, date):
         """统一'今天'，'4月6日'格式化为'2016-1-1'."""

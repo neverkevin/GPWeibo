@@ -51,7 +51,11 @@ class ShowHandler(BaseHandler):
     def post(self):
         data = self.request.arguments
         query = get_query_filter(data)
-        sights = yield model.query_sights(query)
+        print '`mongo.aggregate`: ', query
+        ilter_sights = yield model.query_sights(query)
+        sights = []
+        for sight in ilter_sights:
+            sights.append(sight['_id'])
         color = dict()
         for s in sights:
             color[s] = random.choice(COLORS)
@@ -63,15 +67,23 @@ def get_query_filter(data):
     area = data.get('area', [''])[0]
     month = data.get('month', [''])[0]
     time = data.get('time', [''])[0]
-    query = dict()
-    time_filter = get_time_shuttle(time)
+    filter = [
+            {'$group': {'_id': '$sight', 'count': {'$sum': 1}}},
+            {'$sort': {'count': -1}},
+            {'$limit': 20}
+        ]
+    match = dict()
+    time_match = get_time_shuttle(time)
     if area:
-        query['area'] = area
+        match['area'] = area
     if month:
-        query['month'] = int(month)
-    if time_filter:
-        query.update(time_filter)
-    return query
+        match['month'] = int(month)
+    if time_match:
+        match.update(time_match)
+    aggre_match = dict()
+    aggre_match['$match'] = match
+    filter.insert(0, aggre_match)
+    return filter
 
 
 def get_time_shuttle(time):

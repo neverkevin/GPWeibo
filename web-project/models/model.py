@@ -37,6 +37,4 @@ def get_user_contents(info):
 
 @gen.coroutine
 def query_sights(filter):
-    return mongo.distinct(
-        'weibo', 'sights_tendency', 'sight', filter=filter
-        )
+    return mongo.aggregate('weibo', 'sight_tendency', filter)

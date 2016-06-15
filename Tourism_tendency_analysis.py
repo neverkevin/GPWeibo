@@ -104,7 +104,7 @@ class ResultSaver(threading.Thread):
         sight['name'] = user_info['name']
         sight['area'] = user_info['area']
         self.db.insert_one(
-                'weibo', 'sights_tendency', sight
+                'weibo', 'sight_tendency', sight
                 )
         logging.info(
                 'analysed: name %s, area %s, sight %s',

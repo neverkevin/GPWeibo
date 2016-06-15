@@ -20,12 +20,12 @@
         <tbody>
           {% for user in users %}
           <tr>
-            <td>{{ escape(user['wid']) }}</td>
+            <td>{{ escape(str(user['wid'])) }}</td>
             <td><a href="/user/{{ user['wid'] }}" target="_blank">{{ escape(user['name']) }}</a></td>
             <td>{{ escape(user['area']) }}</td>
-            <td>{{ escape(user['cnum']) }}</td>
-            <td>{{ escape(user['fans']) }}</td>
-            <td>{{ escape(user['follows']) }}</td>
+            <td>{{ escape(str(user['cnum'])) }}</td>
+            <td>{{ escape(str(user['fans'])) }}</td>
+            <td>{{ escape(str(user['follows'])) }}</td>
           </tr>
           {% end %}
         </tbody>
